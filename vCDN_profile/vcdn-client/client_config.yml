@@ -1,0 +1,20 @@
+cached:
+ weight: 1
+ filesize:
+  min: 1
+  max: 5
+  scaler: 1
+ delay:
+  min: 10
+  max: 200
+ objects: 5
+non_cached:
+ weight: 1
+ filesize:
+  min: 1
+  max: 5
+  scaler: 1
+ delay:
+  min: 10
+  max: 200
+ objects: 5

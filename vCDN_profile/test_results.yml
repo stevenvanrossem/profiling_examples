@@ -1,0 +1,283 @@
+- input_metrics: &id001
+  - !!python/object:son.monitor.prometheus_lib.Metric
+    CI:
+      max: 110.1790334203288
+      min: 58.999912698356724
+    average: 84.58947305934277
+    desc: client
+    last_value: 56.72338085000206
+    len: 9
+    list_values:
+    - 22.592506000000867
+    - 71.96261164074205
+    - 128.23185605000162
+    - 56.26790796416342
+    - 125.83787233830637
+    - 93.30440120296504
+    - 100.14105262096298
+    - 106.24366886694048
+    - 56.72338085000206
+    metric_name: cpu@client
+    metric_type: cpu
+    query: sum(rate(container_cpu_usage_seconds_total{name="mn.client"}[3s]))*100
+    sum: 761.3052575340848
+    unit: '%'
+  - !!python/object:son.monitor.prometheus_lib.Metric
+    CI:
+      max: 103.9035526841742
+      min: 40.39781791431841
+    average: 72.1506852992463
+    desc: cache
+    last_value: 111.63944940000192
+    len: 9
+    list_values:
+    - 1.0938064999976065
+    - 40.01369126944358
+    - 101.23613920000025
+    - 61.08760164260799
+    - 149.88609721393152
+    - 76.21277638048926
+    - 49.80118981854784
+    - 58.385416268196764
+    - 111.63944940000192
+    metric_name: cpu@cache
+    metric_type: cpu
+    query: sum(rate(container_cpu_usage_seconds_total{name="mn.cache"}[3s]))*100
+    sum: 649.3561676932168
+    unit: '%'
+  - !!python/object:son.monitor.prometheus_lib.Metric
+    CI:
+      max: 16.502680307431966
+      min: 7.501096873441497
+    average: 12.001888590436732
+    desc: server
+    last_value: 10.709872750000216
+    len: 9
+    list_values:
+    - 3.8273079999996185
+    - 2.507309834420021
+    - 11.727902399999834
+    - 22.051101343952165
+    - 18.85531323382984
+    - 12.79688803141773
+    - 12.574581502016038
+    - 12.966720218295121
+    - 10.709872750000216
+    metric_name: cpu@server
+    metric_type: cpu
+    query: sum(rate(container_cpu_usage_seconds_total{name="mn.server"}[3s]))*100
+    sum: 108.01699731393059
+    unit: '%'
+  - !!python/object:son.monitor.prometheus_lib.Metric
+    CI:
+      max: 3.194990404534167
+      min: 2.981496994102267
+    average: 3.088243699318217
+    desc: client
+    last_value: 3.0634867450980385
+    len: 8
+    list_values:
+    - .nan
+    - 3.2999303529411765
+    - 3.239982022471911
+    - 2.8945066666666666
+    - 3.0453324255319147
+    - 3.065836495238095
+    - 2.9511468865979373
+    - 3.145728
+    - 3.0634867450980385
+    metric_name: filesize@client
+    metric_type: filesize
+    query: (rate(filesize_sum{vnf_name="client"}[3s])/rate(filesize_count{vnf_name="client"}[3s]))/1000000
+    sum: 24.705949594545736
+    unit: MBytes
+  - !!python/object:son.monitor.prometheus_lib.Metric
+    CI:
+      max: 3.358224060014831
+      min: 1.3084426066518355
+    average: 2.3333333333333335
+    desc: client
+    last_value: 4.0
+    len: 9
+    list_values:
+    - 0.0
+    - 4.0
+    - 2.0
+    - 2.0
+    - 1.0
+    - 2.0
+    - 4.0
+    - 2.0
+    - 4.0
+    metric_name: cached_reqs_count@client
+    metric_type: cached_reqs_count
+    query: cached_reqs_count{vnf_name="client"}
+    sum: 21.0
+    unit: Mbits/sec
+  - !!python/object:son.monitor.prometheus_lib.Metric
+    CI:
+      max: 5.652289749130604
+      min: 3.236599139758285
+    average: 4.444444444444445
+    desc: client
+    last_value: 5.0
+    len: 9
+    list_values:
+    - 0.0
+    - 5.0
+    - 5.0
+    - 5.0
+    - 5.0
+    - 5.0
+    - 5.0
+    - 5.0
+    - 5.0
+    metric_name: cached_users@client
+    metric_type: cached_users
+    query: cached_users{vnf_name="client"}
+    sum: 40.0
+    unit: users
+  name: cache
+  output_metrics: &id002
+  - !!python/object:son.monitor.prometheus_lib.Metric
+    CI:
+      max: 3.6634261658085575e-08
+      min: 2.6984371709477385e-08
+    average: 3.180931668378148e-08
+    desc: client
+    last_value: 3.766631645265503e-08
+    len: 8
+    list_values:
+    - .nan
+    - 1.944404918653273e-08
+    - 2.8993262930816458e-08
+    - 3.0242391123835995e-08
+    - 2.974319227026651e-08
+    - 3.510896842943692e-08
+    - 3.475627497040345e-08
+    - 3.852007810630476e-08
+    - 3.766631645265503e-08
+    metric_name: cached_download_speed@client
+    metric_type: cached_download_speed
+    query: 1/(rate(cached_download_speed_sum{vnf_name="client"}[3s])/rate(cached_download_speed_count{vnf_name="client"}[3s]))
+    sum: 2.5447453347025184e-07
+    unit: Mbits/sec
+  - !!python/object:son.monitor.prometheus_lib.Metric
+    CI:
+      max: 158911322.72165537
+      min: 82330971.33943571
+    average: 120621147.03054553
+    desc: cache:client:tx
+    last_value: 144534933.88429752
+    len: 9
+    list_values:
+    - 1065419.5
+    - 62245172.5
+    - 150393141.29353234
+    - 145983857.3581115
+    - 141216463.58613762
+    - 141741917.36350223
+    - 152774470.23511755
+    - 145634947.55421078
+    - 144534933.88429752
+    metric_name: tx_byte_rate@cache:client
+    metric_type: tx_byte_rate
+    query: rate(sonemu_tx_count_bytes{flow_id="None",vnf_name="cache",vnf_interface="client"}[3s])
+    sum: 1085590323.2749097
+    unit: bytes/sec
+  - !!python/object:son.monitor.prometheus_lib.Metric
+    CI:
+      max: 65181003.33703903
+      min: 35512423.913365684
+    average: 50346713.62520236
+    desc: cache:server:rx
+    last_value: 58996207.58385999
+    len: 9
+    list_values:
+    - 1051247.5
+    - 34808101.0
+    - 60996226.368159205
+    - 62169202.410848826
+    - 58044473.12908086
+    - 58051999.50811609
+    - 65255670.83541772
+    - 53747294.291338585
+    - 58996207.58385999
+    metric_name: rx_byte_rate@cache:server
+    metric_type: rx_byte_rate
+    query: rate(sonemu_rx_count_bytes{flow_id="None",vnf_name="cache",vnf_interface="server"}[3s])
+    sum: 453120422.6268212
+    unit: bytes/sec
+  - !!python/object:son.monitor.prometheus_lib.Metric
+    CI:
+      max: 21.451658263260274
+      min: 9.08746390387374
+    average: 15.269561083567007
+    desc: client
+    last_value: 28.344880414416394
+    len: 9
+    list_values:
+    - 4.555555555555555
+    - 4.444444444444445
+    - 8.990011098779133
+    - 12.11111111111111
+    - 15.109432285301631
+    - 18.266356692128863
+    - 20.88888888888889
+    - 24.71536926147705
+    - 28.344880414416394
+    metric_name: processed_cached_reqs_per_sec@client
+    metric_type: processed_cached_reqs_per_sec
+    query: rate(processed_cached_reqs{vnf_name="client"}[10s])
+    sum: 137.42604975210307
+    unit: reqs/sec
+  - !!python/object:son.monitor.prometheus_lib.Metric
+    CI:
+      max: 6.219671057648921e-08
+      min: 3.593329064478168e-08
+    average: 4.9065000610635445e-08
+    desc: client
+    last_value: 5.103737707220573e-08
+    len: 8
+    list_values:
+    - .nan
+    - 1.6891974294330504e-08
+    - 5.804277075135454e-08
+    - 5.233698351145016e-08
+    - 5.1636589053064575e-08
+    - 4.563503064609307e-08
+    - 4.046678665014953e-08
+    - 7.647249290643546e-08
+    - 5.103737707220573e-08
+    metric_name: non_cached_download_speed@client
+    metric_type: non_cached_download_speed
+    query: 1/(rate(non_cached_download_speed_sum{vnf_name="client"}[3s])/rate(non_cached_download_speed_count{vnf_name="client"}[3s]))
+    sum: 3.9252000488508356e-07
+    unit: Mbits/sec
+  resource_alloc: !!python/object/apply:collections.defaultdict
+    args:
+    - &id003 !!python/name:builtins.dict ''
+    dictitems:
+      cache:
+        cpuset_cpus: 2
+      client:
+        cpuset_cpus: 1
+      server:
+        cpuset_cpus: 3
+  run: 1
+  total: 2
+- input_metrics: *id001
+  name: cache
+  output_metrics: *id002
+  resource_alloc: !!python/object/apply:collections.defaultdict
+    args:
+    - *id003
+    dictitems:
+      cache:
+        cpuset_cpus: 2
+      client:
+        cpuset_cpus: 1
+      server:
+        cpuset_cpus: 3
+  run: 2
+  total: 2

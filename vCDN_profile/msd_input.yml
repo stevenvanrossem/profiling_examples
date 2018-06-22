@@ -1,0 +1,42 @@
+
+---
+service_name: "squid"
+version: "0.1"
+author: "Steven Van Rossem, Ghent University, steven.vanrossem@intec.ugent.be"
+description: "Monitor descriptor for squid"
+dashboard: "son-monitor-squid-test"
+
+##
+## Metrics for a single VNF
+##
+vnf_metrics:
+  - metric_type: "cpu"
+    description: "cpu load (%)"
+    vnf_ids:
+      - vnf: "cache" 
+#  - metric_type: "mem"
+#    description: "memory usage (MB)"
+#    vnf_ids:
+#      - vnf: "ns_port0" 
+#      - vnf: "squid" 
+#      - vnf: "ns_port1" 
+#  - metric_type: "cached_reqs_count"
+#    description: "started cached requests (requests)"
+#    vnf_ids:
+#      - vnf: "client"
+  - metric_type: "filesize"
+    description: "avg requested file size (MBytes)"
+    vnf_ids:
+      - vnf: "client"
+  - metric_type: "cached_users"
+    description: "input cached users"
+    vnf_ids:
+      - vnf: "client"
+  - metric_type: "non_cached_users"
+    description: "input non cached users"
+    vnf_ids:
+      - vnf: "client"
+  - metric_type: "false_users"
+    description: "input false users"
+    vnf_ids:
+      - vnf: "client"

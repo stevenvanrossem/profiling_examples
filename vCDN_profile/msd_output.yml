@@ -1,0 +1,39 @@
+
+---
+service_name: "squid"
+version: "0.1"
+author: "Steven Van Rossem, Ghent University, steven.vanrossem@intec.ugent.be"
+description: "Monitor descriptor for squid test"
+dashboard: "son-monitor-squid-test"
+
+##
+## Metrics for a single VNF
+##
+vnf_metrics:
+  - metric_type: "byte_rate_cadv"
+    description: "byte rate (Mbytes/sec)"
+    vnf_ids:
+      - vnf: "cache:client"
+        direction: "tx"
+      - vnf: "cache:server"
+        direction: "rx"
+  - metric_type: "cached_download_latency"
+    description: "cached download latency (sec/Mbyte)"
+    vnf_ids:
+      - vnf: "client"
+  - metric_type: "non_cached_download_latency"
+    description: "non cached download latency (sec/Mbyte)"
+    vnf_ids:
+      - vnf: "client"
+  - metric_type: "processed_cached_reqs_per_sec"
+    description: "processed cached reqs/sec (reqs/sec)"
+    vnf_ids:
+      - vnf: "client"
+  - metric_type: "processed_non_cached_reqs_per_sec"
+    description: "processed non cached reqs/sec (reqs/sec)"
+    vnf_ids:
+      - vnf: "client"
+  - metric_type: "processed_false_reqs_per_sec"
+    description: "processed false reqs/sec (reqs/sec)"
+    vnf_ids:
+      - vnf: "client"
