@@ -6,7 +6,8 @@ RUN	apt-get update && apt-get install -y \
 	iproute \
 	inetutils-ping \
         ethtool \
-	curl
+	curl \
+        nano
 
 
 ADD start.sh start.sh
@@ -32,5 +33,9 @@ RUN chmod +x locustfile.py
 
 ADD client_config.yml client_config.yml
 RUN chmod +x client_config.yml
+
+ADD start_client.sh start_client.sh
+RUN chmod +x start_client.sh
+
 
 CMD /bin/bash

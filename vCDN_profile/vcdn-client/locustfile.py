@@ -44,6 +44,8 @@ PROM_CACHED_USERS = Counter('cached_users', 'cached requests',
                          ['vnf_name'], registry=VCDN_REGISTRY).labels(vnf_name=VNF_NAME)
 PROM_NON_CACHED_USERS = Counter('non_cached_users', 'cached requests',
                                ['vnf_name'], registry=VCDN_REGISTRY).labels(vnf_name=VNF_NAME)
+PROM_VCDN_USERS = Counter('vcdn_users', 'number of users',
+                               ['vnf_name'], registry=VCDN_REGISTRY).labels(vnf_name=VNF_NAME)
 
 PROM_PROCESSED_FALSE_REQS = Counter('processed_false_reqs', 'false requests',
                          ['vnf_name'], registry=VCDN_REGISTRY).labels(vnf_name=VNF_NAME)
@@ -88,7 +90,6 @@ def export_metrics():
         pushadd_to_gateway(PUSHGATEWAY, job='vcdn_client', registry=VCDN_REGISTRY)
         sleep(1)
 
-
 export_thread = threading.Thread(target=export_metrics)
 export_thread.start()
 
@@ -103,6 +104,16 @@ def genFileId(numFiles=10):
 
 def genBool():
     return random() < 0.5
+
+# return True if request should be cached
+def genCached(percentage_cached):
+    # pickList = ['cached'] * percentage_cached + ['noncached'] * (100 - percentage_cached)
+    # req = choice(pickList)
+    # if req == 'cached':
+    #     return True
+    # else:
+    #     return False
+    return randint(0, 99) < percentage_cached 
 
 
 class RandomGetter(TaskSet):
@@ -139,6 +150,89 @@ class RandomGetter(TaskSet):
             PROM_CACHED_REQS.inc()
             PROM_CACHED_SPEED.observe(total_speed)
             PROM_CACHED_REQS_CURRENT.dec()
+
+
+class FileGetter(TaskSet):
+
+    # report the number of users
+    def on_start(self):
+        PROM_VCDN_USERS.inc()
+        self.percentage_cached = CONFIG['percentage_cached']
+        self.monitored_cached = 0
+        self.monitored_noncached = 0
+
+    # get a file from the cdn
+    @task(1)
+    def browse(self):
+        self.cached = genCached(self.percentage_cached)
+        if self.cached:
+            self.doCachedRequest()
+        else:
+            self.doNonCachedRequest()
+
+    @PROM_CACHED_REQS_CURRENT.track_inprogress()
+    def doCachedRequest(self):
+        #logging.info('start cached')
+        #self.monitored_cached += 1
+        #logging.info('percentage cached: {0}'.format(
+        #    100 * self.monitored_cached / (self.monitored_noncached + self.monitored_cached)))
+        #logging.info('{0}'.format(self.monitored_cached))
+        #logging.info('{0}'.format(self.monitored_noncached))
+
+        PROM_INPUT_CACHED_REQS.inc()
+        headers = {}
+
+        config = CONFIG['cached']
+        min = config['filesize']['min']
+        max = config['filesize']['max']
+        scaler = config['filesize']['scaler']
+        filesize = genFileSize(min=min, max=max, scaler=scaler)
+        fileid = genFileId(config['objects'])
+        url = "/file/{}/{}".format(fileid, filesize)
+
+        start = time.time()
+        r = self.client.get(url, headers=headers)
+        total_time = (time.time() - start)
+        logging.info("c status code: {} - {}".format(r.status_code, r.reason))
+
+        total_length = int(r.headers.get('content-length'))
+        PROM_FILESIZE.observe(total_length)
+        PROM_PROCESSED_CACHED_REQS.inc()
+        total_speed = total_length // total_time
+        PROM_CACHED_SPEED.observe(total_speed)
+
+
+    @PROM_NON_CACHED_REQS_CURRENT.track_inprogress()
+    def doNonCachedRequest(self):
+        #logging.info('start non cached')
+        #self.monitored_noncached += 1
+        #logging.info('percentage cached: {0}'.format(
+        #    100 * self.monitored_cached / (self.monitored_noncached + self.monitored_cached)))
+        #logging.info('{0}'.format(self.monitored_cached))
+        #logging.info('{0}'.format(self.monitored_noncached))
+
+        PROM_INPUT_NON_CACHED_REQS.inc()
+        headers = {'Cache-Control': 'no-cache'}
+
+        config = CONFIG['non_cached']
+        min = config['filesize']['min']
+        max = config['filesize']['max']
+        scaler = config['filesize']['scaler']
+        filesize = genFileSize(min=min, max=max, scaler=scaler)
+        fileid = genFileId(config['objects'])
+        url = "/file/{}/{}".format(fileid, filesize)
+
+        start = time.time()
+        r = self.client.get(url, headers=headers)
+        total_time = (time.time() - start)
+        logging.info("nc status code: {} - {}".format(r.status_code, r.reason))
+
+        total_length = int(r.headers.get('content-length'))
+        PROM_FILESIZE.observe(total_length)
+        PROM_PROCESSED_NON_CACHED_REQS.inc()
+        total_speed = total_length // total_time
+        PROM_NON_CACHED_SPEED.observe(total_speed)
+
 
 
 class SurfNonCached(TaskSet):
@@ -218,6 +312,13 @@ class FalseGet(TaskSet):
         r = self.client.get(url, timeout=0.1)
         PROM_PROCESSED_FALSE_REQS.inc()
 
+
+class CDNUser(HttpLocust):
+    task_set = FileGetter
+    min_wait = CONFIG['delay']['min']
+    max_wait = CONFIG['delay']['max']
+
+"""
 class UserNonCached(HttpLocust):
     config_noncached = CONFIG['non_cached']
     weight = config_noncached['weight']
@@ -247,3 +348,4 @@ class RandomGet(HttpLocust):
     task_set = RandomGetter
     min_wait = 0
     max_wait = 100
+"""

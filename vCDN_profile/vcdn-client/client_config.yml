@@ -1,20 +1,24 @@
+percentage_cached: 10
+delay:
+  min: 200
+  max: 200
 cached:
- weight: 1
+ weight: 20
  filesize:
-  min: 1
-  max: 5
-  scaler: 1
- delay:
   min: 10
+  max: 10
+  scaler: 10
+ delay:
+  min: 200
   max: 200
- objects: 5
+ objects: 200
 non_cached:
- weight: 1
+ weight: 80
  filesize:
-  min: 1
-  max: 5
-  scaler: 1
- delay:
   min: 10
+  max: 10
+  scaler: 10
+ delay:
+  min: 200
   max: 200
- objects: 5
+ objects: 200

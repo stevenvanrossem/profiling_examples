@@ -21,7 +21,7 @@ service_experiments:
   - name: "cache"
     description: "start a number of cached and non-cached downloads in parallel"
     repetitions: 1
-    time_limit: "60"
+    time_limit: "20"
     # NSD to be used (SONATA-like vendor.name.version reference)
     # service: "eu.sonata-nfv.sonata-fw-vtc-service.0.1"
     # additional containers for traffic generation/measurements (like SAPs)
@@ -32,8 +32,11 @@ service_experiments:
         #configuration:
         #  - bash -c "echo 'export http_proxy=10.30.3.1:3128' >> ~/.bashrc"
         #cmd: python squid_client.py 10 10 'http://10.20.0.2:8888/file/${10,50}' '10.10.0.1:3128'
-        cmd: locust --host http://10.20.0.2:8888 --no-web -c ${10,30,70,100,130,170,200} -r 100 UserNonCached UserCached
-        #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${10,20} -r 10 UserFalse
+        #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${10,30,70,100,130,170,200} -r 100 UserNonCached UserCached
+        #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${2} -r 10 UserFalse
+        #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${2} -r 2 UserNonCached UserCached
+        #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${200} -r 100 CDNUser
+        cmd: bash start_client.sh ${90}
         cmd_order: 3
       - name: "server"
         #connection_point: "ns:port1"
@@ -66,12 +69,12 @@ service_experiments:
       - function: "cache"
         #cpu_bw: "${0.1 to 0.7 step 0.5}"
         #cpu_bw: 0.5
-        cpuset_cpus: 2
-        #mem_limit: 512m
-      - function: "server"
         cpuset_cpus: 3
+        mem_limit: 1024m
+      - function: "server"
+        cpuset_cpus: 0,1,2
         #cpu_bw: "0.4"
       - function: "client"
-        cpuset_cpus: 1
+        cpuset_cpus: 0,1,2
         #cpu_bw: "0.4"
 

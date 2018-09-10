@@ -5,9 +5,12 @@ import numpy as np
 from execute_profiling import CONFIGS
 import matplotlib.pyplot as plt
 from sklearn.cross_decomposition import CCA
+from sklearn.cross_decomposition import PLSRegression
+from sklearn.decomposition import FactorAnalysis as FA
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn import linear_model
 from operator import add, div
-
+from copy import deepcopy
 
 logging.basicConfig(level='DEBUG')
 
@@ -111,85 +114,136 @@ def getMetricsFromFiles(filepath):
     return metrics
 
 
-if __name__ == "__main__":
-
-    resultsfiles = "test_data1/results_*"
-    resultsfiles2 = "50p_results/results_*"
-
-    # process metrics once
-    #metrics = getMetricsFromFiles(resultsfiles)
-    #metrics2 = getMetricsFromFiles(resultsfiles2)
-
-    # get from already processed file
-    metrics = getProcessedResults('test_data1/processed.yml')
-    metrics2 = getProcessedResults('50p_results/processed.yml')
-
-    # calculate a custom metric
-    metrics['total_users'] = list(map(add, metrics['cached_users@client'], metrics['non_cached_users@client']))
-    metrics2['total_users'] = list(map(add, metrics2['cached_users@client'], metrics2['non_cached_users@client']))
-
-    metrics['tx_byte_rate_perc@cache:client'] = np.divide(metrics['tx_byte_rate_cadv@cache:client'], 2.50)
-    metrics['rx_byte_rate_perc@cache:server'] = np.divide(metrics['rx_byte_rate_cadv@cache:server'], 2.50)
-    metrics2['tx_byte_rate_perc@cache:client'] = np.divide(metrics2['tx_byte_rate_cadv@cache:client'], 2.50)
-    metrics2['rx_byte_rate_perc@cache:server'] = np.divide(metrics2['rx_byte_rate_cadv@cache:server'], 2.50)
-
-    metrics2['cpu@cache'] = np.multiply(metrics2['cpu@cache'], 1)
-
-    metricsInput = ['wl_cachedPerc', 'wl_delay', 'wl_filesize', 'wl_objects',
-                    'cached_users@client', 'non_cached_users@client',
-                    'false_users@client']
-
-    metricsInput2 = [ #'wl_cachedPerc', 'total_users',
-                      'cached_users@client',
-                      'non_cached_users@client',
-                      ]
 
 
 
+resultsfiles = "test_data1/results_*"
+resultsfiles2 = "50p_results/results_*"
+resultsfiles3 = "100Mb_results/results_*"
+resultsfiles4 = "1000Mb_results/results_*"
+resultsfiles5 = "0p_1000Mb_results/results_*"
+resultsfiles6 = "0p_results/results_*"
 
-    metricsOutput = ['cpu@cache', 'tx_byte_rate_cadv@cache:client', 'rx_byte_rate_cadv@cache:server',
-                     'cached_download_latency@client', 'non_cached_download_latency@client',
-                     'processed_cached_reqs_per_sec@client', 'processed_non_cached_reqs_per_sec@client',
-                     'processed_false_reqs_per_sec@client']
+# process metrics once
+#metrics = getMetricsFromFiles(resultsfiles)
+#metrics2 = getMetricsFromFiles(resultsfiles2)
+#metrics3 = getMetricsFromFiles(resultsfiles3)
+#metrics6 = getMetricsFromFiles(resultsfiles6)
 
-    metricsOutput2 = [
-                    'cpu@cache',
-                    'cached_download_latency@client', 'non_cached_download_latency@client',
-                    'tx_byte_rate_perc@cache:client', 'rx_byte_rate_perc@cache:server',
-                    #'processed_cached_reqs_per_sec@client', 'processed_non_cached_reqs_per_sec@client',
-                     ]
+# get from already processed file
+metrics = getProcessedResults('test_data1/processed.yml')
+metrics2 = getProcessedResults('50p_results/processed.yml')
+metrics3 = getProcessedResults('100Mb_results/processed.yml')
+#metrics2 = getProcessedResults('1000Mb_results/processed.yml')
+#metrics2 = getProcessedResults('0p_1000Mb_results/processed.yml')
+#metrics2 = getProcessedResults('0p_results/processed.yml')
 
+# calculate a custom metric
+metrics['total_users'] = list(map(add, metrics['cached_users@client'], metrics['non_cached_users@client']))
+metrics2['total_users'] = list(map(add, metrics2['cached_users@client'], metrics2['non_cached_users@client']))
+
+metrics['tx_byte_rate_perc@cache:client'] = np.divide(metrics['tx_byte_rate_cadv@cache:client'], 2.5)#2.5 #0.125
+metrics['rx_byte_rate_perc@cache:server'] = np.divide(metrics['rx_byte_rate_cadv@cache:server'], 2.5)#2.5
+metrics2['tx_byte_rate_perc@cache:client'] = np.divide(metrics2['tx_byte_rate_cadv@cache:client'], 2.5)
+metrics2['rx_byte_rate_perc@cache:server'] = np.divide(metrics2['rx_byte_rate_cadv@cache:server'], 2.5)
+metrics3['tx_byte_rate_perc@cache:client'] = np.divide(metrics3['tx_byte_rate_cadv@cache:client'], 2.5)
+metrics3['rx_byte_rate_perc@cache:server'] = np.divide(metrics3['rx_byte_rate_cadv@cache:server'], 2.5)
+
+
+
+metrics['cached_download_latency_perc@client'] = np.divide(metrics['cached_download_latency@client'], 0.001)#0.001
+metrics['non_cached_download_latency_perc@client'] = np.divide(metrics['non_cached_download_latency@client'], 0.001)#0.0025
+metrics['cached_download_bw@client'] = np.divide(1, metrics['cached_download_latency@client'])#0.001
+metrics['non_cached_download_bw@client'] = np.divide(1, metrics['non_cached_download_latency@client'])#0.0025
+
+metrics2['cached_download_latency_perc@client'] = np.divide(metrics2['cached_download_latency@client'], 0.001)#0.05
+metrics2['non_cached_download_latency_perc@client'] = np.divide(metrics2['non_cached_download_latency@client'], 0.001)#0.1
+metrics3['cached_download_latency_perc@client'] = np.divide(metrics3['cached_download_latency@client'], 0.001)#0.05
+metrics3['non_cached_download_latency_perc@client'] = np.divide(metrics3['non_cached_download_latency@client'], 0.001)#0.1
+
+
+
+metricsInput = ['wl_cachedPerc', 'wl_delay', 'wl_filesize', 'wl_objects',
+                'cached_users@client', 'non_cached_users@client',
+                'false_users@client']
+
+metricsInput2 = [ 'wl_cachedPerc',
+                  'total_users',
+                  #'cached_users@client',
+                  #'non_cached_users@client',
+                  ]
+
+
+
+
+metricsOutput = ['cpu@cache', 'tx_byte_rate_cadv@cache:client', 'rx_byte_rate_cadv@cache:server',
+                 'cached_download_latency@client', 'non_cached_download_latency@client',
+                 'processed_cached_reqs_per_sec@client', 'processed_non_cached_reqs_per_sec@client',
+                 'processed_false_reqs_per_sec@client']
+
+metricsOutput2 = [
+                'cached_download_latency@client',
+                'non_cached_download_latency@client',
+                #'cached_download_bw@client',
+                #'processed_cached_reqs_per_sec@client', 'processed_non_cached_reqs_per_sec@client',
+                'cpu@cache',
+                'tx_byte_rate_cadv@cache:client',
+                #'rx_byte_rate_perc@cache:server',
+                 ]
+
+def doCCA(metrics, color):
     inp = np.array([metrics[m] for m in metricsInput2]).T.astype(float)
     out = np.array([metrics[m] for m in metricsOutput2]).T.astype(float)
+    inp0 = np.zeros(len(metricsInput2))
+    out0 = np.zeros(len(metricsOutput2))
+    inp = np.vstack((inp, inp0))
+    out = np.vstack((out, out0))
+    cca = CCA(n_components=1, scale=False)
+    cca.fit(inp, out)
+    inp_cca = inp.dot(cca.x_weights_)
+    out_cca = out.dot(cca.y_weights_)
 
-    all = np.concatenate((inp, out), axis=1)
-    nSat = all[all[:, 2] <= 60]
-    Sat = all[all[:, 2] > 60]
-    inpSat = Sat[:, 0:2]
-    outSat = Sat[:, 2:]
-    inpnSat = nSat[:, 0:2]
-    outnSat = nSat[:, 2:]
+    # Create linear regression object
+    regr = linear_model.LinearRegression()
+    # Train the model using the training sets
+    regr.fit(inp_cca, out_cca)
+    cca_regr = regr.predict(inp_cca)
+    # The coefficients
+    print('Coefficients: \n', regr.coef_)
 
-    # cached latency
-    hLat = all[all[:, 3] > 0.15]
-    lLat = all[all[:, 3] <= 0.15]
-    inpHLat = hLat[:, 0:2]
-    inpLLat = lLat[:, 0:2]
-    outHLat = hLat[:, 2:]
-    outLLat = lLat[:, 2:]
+    plt.scatter(inp_cca, out_cca, c=color)
+    plt.plot(inp_cca, cca_regr, color=color, linewidth=0.5)
 
-    # non cached latency
-    nhLat = all[all[:, 4] > 0.35]
-    nlLat = all[all[:, 4] <= 0.15]
-    inpnHLat = nhLat[:, 0:2]
-    inpnLLat = nlLat[:, 0:2]
-    outnHLat = nhLat[:, 2:]
-    outnLLat = nlLat[:, 2:]
+    logging.info('cca')
+    logging.info(cca.x_rotations_)
+    logging.info(cca.y_rotations_)
 
-    # linerate
-    hRate = all[all[:, 5] > 80]
-    inphRate = hRate[:, 0:2]
-    outhRate = hRate[:, 2:]
+
+
+if __name__ == "__main__":
+
+
+    #metrics3 = deepcopy(metrics)
+    #metrics3['cpu@cache'] = np.multiply(metrics3['cpu@cache'], 2)
+
+
+    # doCCA(metrics, 'green')
+    # doCCA(metrics2, 'red')
+    # doCCA(metrics3, 'blue')
+    # plt.grid()
+    # #plt.savefig('test1.png')
+    # plt.show()
+    # exit(0)
+
+
+    # inp = np.array([metrics[m] for m in metricsInput2]).T.astype(float)
+    # out = np.array([metrics[m] for m in metricsOutput2]).T.astype(float)
+    # all = np.concatenate((inp, out), axis=1)
+    #
+    # FA = FA()
+    # FA.fit(all)
+    # print(FA.get_covariance())
+
 
     #plt.scatter(inpnSat[:,1], outnSat[:,0], c='g')
     #plt.show()
@@ -197,78 +251,161 @@ if __name__ == "__main__":
     #inp = np.array([metrics[m] for m in metricsInput2]).T.astype(float)
     #out = np.array([metrics[m] for m in metricsOutput2]).T.astype(float)
 
+
+    #singleScatter('non_cached_users@client', 'non_cached_download_latency@client', metrics)
+    #singleScatter('cached_users@client', 'cached_download_latency@client', metrics2)
     #singleScatter('cached_users@client', 'processed_cached_reqs_per_sec@client', metrics)
     #singleScatter('non_cached_users@client', 'processed_non_cached_reqs_per_sec@client', metrics)
     #singleScatter('wl_cachedPerc', 'cpu@cache', metrics)
-    #singleScatter('non_cached_users@client', 'cpu@cache', metrics2)
-    #singleScatter('cached_download_latency@client', 'cpu@cache', metrics)
-    #singleScatter('non_cached_users@client', 'tx_byte_rate_cadv@cache:client', metrics)
+    #singleScatter('cached_users@client', 'cpu@cache', metrics)
+    #singleScatter('cached_users@client', 'non_cached_download_bw@client', metrics)
+    #singleScatter('cpu@cache', 'non_cached_download_latency@client', metrics)
+    #singleScatter('cpu@cache', 'tx_byte_rate_cadv@cache:client', metrics)
     #singleScatter('non_cached_users@client', 'tx_byte_rate_perc@cache:client', metrics)
     #singleScatter('non_cached_users@client', 'tx_byte_rate_perc@cache:client', metrics2)
 
     #exit(0)
 
+
+    inp0 = np.zeros(len(metricsInput2))
+    out0 = np.zeros(len(metricsOutput2))
+
     scale = False
-    cca = CCA(n_components=1, scale=scale)
+    inp = np.array([metrics[m] for m in metricsInput2]).T.astype(float)
+    out = np.array([metrics[m] for m in metricsOutput2]).T.astype(float)
+    inp = np.vstack((inp, inp0))
+    out = np.vstack((out, out0))
+
+    all = np.concatenate((inp, out), axis=1)
+    # fixed cache
+    fixed = all[all[:, 0] == 90]
+    inp_fixed = fixed[:, 1:2]
+    out_fixed = fixed[:, 2:6]
+
+
+    # cached latency
+    all = fixed
+    Sat = all[all[:, 4] > 80]
+    nSat = all[all[:, 4] <= 80]
+    inpSat = Sat[:, 1:2]
+    inpnSat = nSat[:, 1:2]
+    outSat = Sat[:, 2:4]
+    outnSat = nSat[:, 2:4]
+
+    inp = inp_fixed #inpnSat #inp_fixed
+    out = out_fixed #outnSat #out_fixed
+
+    poly = PolynomialFeatures(1, include_bias=False, interaction_only=False)
+    inp = poly.fit_transform(inp)
+    # inp = inp_poly[:, 2:]
+
+    cca = CCA(n_components=1, scale=True)
     cca.fit(inp, out)
+    #out_pred = cca.predict(inp)
+    #print(cca.score(inp, out))
+    inp_cca = inp.dot(cca.x_rotations_)
+    out_cca = out.dot(cca.y_rotations_)
+    print(cca.x_loadings_)
+    print(cca.y_loadings_)
+    plt.scatter(inp_cca, out_cca, c='purple')
+
+
+    pls2 = PLSRegression(n_components=1, scale=True)
+    pls2.fit(inp, out)
+    print(pls2.score(inp, out))
+    print(pls2.x_loadings_)
+    print(pls2.y_loadings_)
+    inp_pls = inp.dot(pls2.x_rotations_)
+    out_pls = out.dot(pls2.y_rotations_)
+    #plt.scatter(pls2.x_scores_, pls2.y_scores_, c='g')
+    #plt.scatter(inp_pls, out_pls, c='g')
+
+    pls2 = PLSRegression(n_components=1, scale=scale)
+    pls2.fit(inp, out)
+    print(pls2.score(inp, out))
+    out_pls_pred0 = inp.dot(pls2.coef_)[:, 0]
+    plt.scatter(out, inp.dot(pls2.coef_), c=['r', 'g'], marker='+')
+    #out_pls_pred1 = inp.dot(pls2.coef_[:, 1])
+    #plt.scatter(out[:, 1], out_pls_pred1, c='grey', marker='+')
+
+    #plt.scatter(inp[:, 0], out[:, 0] - out_pls_pred0, c='grey', marker='+')
+    #plt.scatter(inp[:, 1], out[:, 1] - out_pls_pred1, c='green', marker='+')
+
+    inp_pls = inp.dot(pls2.x_rotations_)
+    out_pls = out.dot(pls2.y_rotations_)
+    #plt.scatter(inp_pls, out_pls, c=['r'])
+    #plt.scatter(pls2.x_scores_, pls2.y_scores_, c='g')
+
+
+
+    plt.grid()
+    plt.show()
+    exit(0)
 
     inp_cca = inp.dot(cca.x_weights_)
     out_cca = out.dot(cca.y_weights_)
+    #inp_cca = cca.x_scores_
+    #out_cca = cca.y_scores_
     # Create linear regression object
     regr = linear_model.LinearRegression()
     # Train the model using the training sets
     regr.fit(inp_cca, out_cca)
     cca_regr = regr.predict(inp_cca)
     # The coefficients
-    #print('Coefficients: \n', regr.coef_)
+    print('Coefficients: \n', cca.coef_)
 
-    plt.scatter(inp_cca, out_cca, c='g')
+    inp_cca_n1 = inp.dot(cca.x_weights_[:, 0])
+    out_cca_n1 = out.dot(cca.y_weights_[:, 0])
+    out_cca_pred = inp.dot(cca.coef_[:, 0])
+    #out_cca_pred2 = inp.dot(cca.coef_[:, 1])
+    #out_cca_pred3 = inp.dot(cca.coef_[:, 2])
+    #out_cca_pred4 = inp.dot(cca.coef_[:, 3])
+    # inp_cca_n2 = inp.dot(cca.x_weights_[:, 1])
+    # out_cca_n2 = out.dot(cca.y_weights_[:, 1])
 
+    #plt.scatter(out_cca_pred, out[:, 0], c='g', marker='+')
 
-    inp_cca_hLat = inpHLat.dot(cca.x_weights_)
-    out_cca_hLat = outHLat.dot(cca.y_weights_)
-    plt.scatter(inp_cca_hLat, out_cca_hLat, s=100, facecolors='none', edgecolors='red')
+    #plt.scatter(inp_cca_n1, out_cca_n1, c='g')
+    #plt.scatter(inp_cca_n1, out_cca_pred, c='grey', marker='+')
+    #plt.scatter(inp_cca_n1, out_cca_pred2, c='r', marker='+')
+    #plt.scatter(inp_cca_n1, out_cca_pred3, c='b', marker='+')
+    #plt.scatter(inp_cca_n1, out_cca_pred4, c='purple', marker='+')
+    #plt.scatter(cca.x_scores_, cca.y_scores_, c='r')
+    plt.scatter(inp_cca_n1, out_cca_n1, c='grey')
+    #plt.scatter(inp, out_pred, c='r')
 
-    inp_cca_nhLat = inpnHLat.dot(cca.x_weights_)
-    out_cca_nhLat = outnHLat.dot(cca.y_weights_)
-    plt.scatter(inp_cca_nhLat, out_cca_nhLat, s=150, facecolors='none', edgecolors='green')
-
-    inp_cca_hRate = inphRate.dot(cca.x_weights_)
-    out_cca_hRate = outhRate.dot(cca.y_weights_)
-    plt.scatter(inp_cca_hRate, out_cca_hRate, s=200, facecolors='none', edgecolors='blue')
-
-    inp_cca_sat = inpSat.dot(cca.x_weights_)
-    out_cca_nsat = outSat.dot(cca.y_weights_)
-    #plt.scatter(inp_cca_sat, out_cca_nsat, c='orange', s=300, alpha=0.5)
-
-    #plt.grid()
-    #plt.show()
-    #exit(0)
-
-    #plt.scatter(cca.x_scores_, cca.y_scores_, c='g')
-    plt.plot(inp_cca, cca_regr, color='r', linewidth=0.5)
-
+    logging.info('cca1')
     logging.info(cca.x_rotations_)
     logging.info(cca.y_rotations_)
 
-    X_meas = inp[0, :]
-    Y_meas = out[0, :]
-    cca_in = X_meas.dot(cca.x_rotations_)
-    cca_in2 = inp_cca[0]
-    cca_out = Y_meas.dot(cca.y_rotations_)
-    cca_out2 = out_cca[0]
-    cca_out3 = regr.predict(cca_in.reshape(1, -1))[0]
+
+    plt.grid()
+    plt.show()
+    exit(0)
+
+    #plt.scatter(cca.x_scores_, cca.y_scores_, c='g')
+    plt.plot(inp_cca, cca_regr, color='g', linewidth=0.5)
+
+
+
+    # X_meas = inp[0, :]
+    # Y_meas = out[0, :]
+    # cca_in = X_meas.dot(cca.x_rotations_)
+    # cca_in2 = inp_cca[0]
+    # cca_out = Y_meas.dot(cca.y_rotations_)
+    # cca_out2 = out_cca[0]
+    # cca_out3 = regr.predict(cca_in.reshape(1, -1))[0]
 
     #plt.scatter(cca_in, cca_out, s=100, c='g')
     #plt.scatter(cca_in, cca_out3, s=100, c='g', marker='+')
 
-    X_measb = inp[10, :]
-    Y_measb = out[10, :]
-    cca_inb = X_measb.dot(cca.x_rotations_)
-    cca_outb = regr.predict(cca_inb.reshape(1, -1))[0]
-
-    xratio = cca_inb / cca_in
-    yratio = Y_measb / Y_meas
+    # X_measb = inp[10, :]
+    # Y_measb = out[10, :]
+    # cca_inb = X_measb.dot(cca.x_rotations_)
+    # cca_outb = regr.predict(cca_inb.reshape(1, -1))[0]
+    #
+    # xratio = cca_inb / cca_in
+    # yratio = Y_measb / Y_meas
 
 
     #plt.scatter(cca_inb, cca_outb, s=500, c='g', marker='+')
@@ -277,23 +414,61 @@ if __name__ == "__main__":
     # also plot second cca test
     inp2 = np.array([metrics2[m] for m in metricsInput2]).T.astype(float)
     out2 = np.array([metrics2[m] for m in metricsOutput2]).T.astype(float)
+    inp2 = np.vstack((inp2, inp0))
+    out2 = np.vstack((out2, out0))
     cca2 = CCA(n_components=1, scale=scale)
     cca2.fit(inp2, out2)
     inp_cca2 = inp2.dot(cca.x_weights_)
     out_cca2 = out2.dot(cca.y_weights_)
     #inp_cca2 = inp2.dot(cca2.x_weights_)
     #out_cca2 = out2.dot(cca2.y_weights_)
+    #inp_cca2 = cca2.x_scores_
+    #out_cca2 = cca2.y_scores_
+
+
+
+    inp_cca2_n1 = inp2.dot(cca2.x_weights_)
+    out_cca2_n1 = out2.dot(cca2.y_weights_)
+    #inp_cca2_n2 = inp.dot(cca2.x_weights_)[:, 1]
+    #out_cca2_n2 = out.dot(cca2.y_weights_)[:, 1]
     # Create linear regression object
     regr = linear_model.LinearRegression()
     # Train the model using the training sets
-    regr.fit(inp_cca2, out_cca2)
-    cca_regr2 = regr.predict(inp_cca2)
-    plt.scatter(inp_cca2, out_cca2, c='black', s=50)
-    #plt.scatter(cca2.x_scores_, cca2.y_scores_, c='red', s=50)
-    #plt.plot(inp_cca2, cca_regr2, color='grey', linewidth=0.5)
+    regr.fit(inp_cca2_n1, out_cca2_n1)
+    cca_regr2 = regr.predict(inp_cca2_n1)
+    # The coefficients
+    print('Coefficients: \n', regr.coef_)
 
+    #plt.scatter(inp_cca2_n1, out_cca2_n1, c='black', s=50)
+    plt.scatter(inp_cca2, out_cca2, c='beige', s=50)
+    #plt.scatter(inp_cca2_n2, out_cca2_n2, c='grey', s=50)
+    #plt.scatter(cca2.x_scores_, cca2.y_scores_, c='red', s=50)
+    #plt.plot(inp_cca2_n1, cca_regr2, color='grey', linewidth=0.5)
+
+    logging.info('cca2')
     logging.info(cca2.x_rotations_)
     logging.info(cca2.y_rotations_)
+
+    # plt.grid()
+    # plt.savefig('test2.png')
+    # plt.show()
+    # exit(0)
+
+    # inp3 = np.array([metrics3[m] for m in metricsInput2]).T.astype(float)
+    # out3 = np.array([metrics3[m] for m in metricsOutput2]).T.astype(float)
+    # cca3 = CCA(n_components=1, scale=scale)
+    # cca3.fit(inp3, out3)
+    # inp_cca3 = inp3.dot(cca3.x_weights_)
+    # out_cca3 = out3.dot(cca3.y_weights_)
+    # plt.scatter(inp_cca3, out_cca3, c='purple', s=50)
+    #
+    # inp_cca3b = inp2.dot(cca3.x_weights_)
+    # out_cca3b = out2.dot(cca3.y_weights_)
+    # plt.scatter(inp_cca3b, out_cca3b, c='orange', s=100, alpha=0.5)
+    #
+    # logging.info('cca3')
+    # logging.info(cca3.x_rotations_)
+    # logging.info(cca3.y_rotations_)
 
     #X_test = np.array([20, 20, 80])
     #cca_inp_test = X_test.dot(cca.x_rotations_)
@@ -302,9 +477,76 @@ if __name__ == "__main__":
     #plt.scatter(cca_inp_test, cca_out_test, s=100, c='b')
 
 
-    plt.grid()
-    plt.show()
+    all = np.concatenate((inp, out), axis=1)
+    # cached latency
+    hLat = all[all[:, 2] > 90]
+    lLat = all[all[:, 2] <= 90]
+    inpHLat = hLat[:, 0:2]
+    inpLLat = lLat[:, 0:2]
+    outHLat = hLat[:, 2:]
+    outLLat = lLat[:, 2:]
 
+    inp_cca_hLat = inpHLat.dot(cca.x_weights_)
+    out_cca_hLat = outHLat.dot(cca.y_weights_)
+    plt.scatter(inp_cca_hLat, out_cca_hLat, s=150, facecolors='none', edgecolors='red')
+
+    # # non cached latency
+    nhLat = all[all[:, 3] > 90]
+    nlLat = all[all[:, 3] <= 90]
+    inpnHLat = nhLat[:, 0:2]
+    inpnLLat = nlLat[:, 0:2]
+    outnHLat = nhLat[:, 2:]
+    outnLLat = nlLat[:, 2:]
+
+    inp_cca_nhLat = inpnHLat.dot(cca.x_weights_)
+    out_cca_nhLat = outnHLat.dot(cca.y_weights_)
+    plt.scatter(inp_cca_nhLat, out_cca_nhLat, s=50, facecolors='none', edgecolors='green')
+
+
+
+
+    all = np.concatenate((inp2, out2), axis=1)
+    # cached latency
+    hLat = all[all[:, 2] > 90]
+    lLat = all[all[:, 2] <= 90]
+    inpHLat = hLat[:, 0:2]
+    inpLLat = lLat[:, 0:2]
+    outHLat = hLat[:, 2:]
+    outLLat = lLat[:, 2:]
+
+    inp_cca_hLat = inpHLat.dot(cca2.x_weights_)
+    out_cca_hLat = outHLat.dot(cca2.y_weights_)
+    plt.scatter(inp_cca_hLat, out_cca_hLat, s=150, facecolors='none', edgecolors='red')
+
+    # # non cached latency
+    nhLat = all[all[:, 3] > 90]
+    nlLat = all[all[:, 3] <= 90]
+    inpnHLat = nhLat[:, 0:2]
+    inpnLLat = nlLat[:, 0:2]
+    outnHLat = nhLat[:, 2:]
+    outnLLat = nlLat[:, 2:]
+
+    inp_cca_nhLat = inpnHLat.dot(cca2.x_weights_)
+    out_cca_nhLat = outnHLat.dot(cca2.y_weights_)
+    plt.scatter(inp_cca_nhLat, out_cca_nhLat, s=100, facecolors='none', edgecolors='green')
+
+
+
+    #
+    # inp_cca_hRate = inphRate.dot(cca2.x_weights_)
+    # out_cca_hRate = outhRate.dot(cca2.y_weights_)
+    # plt.scatter(inp_cca_hRate, out_cca_hRate, s=100, facecolors='none', edgecolors='blue')
+    #
+    # inp_cca_sat = inpSat.dot(cca2.x_weights_)
+    # out_cca_sat = outSat.dot(cca2.y_weights_)
+    # plt.scatter(inp_cca_sat, out_cca_sat, s=150, facecolors='none', edgecolors='orange')
+
+
+
+    plt.grid()
+
+    plt.savefig('test.png')
+    plt.show()
 
 
     #x_scatter = cca.x_scores_

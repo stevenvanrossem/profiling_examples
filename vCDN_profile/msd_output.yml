@@ -10,8 +10,8 @@ dashboard: "son-monitor-squid-test"
 ## Metrics for a single VNF
 ##
 vnf_metrics:
-  - metric_type: "byte_rate_cadv"
-    description: "byte rate (Mbytes/sec)"
+  - metric_type: "bitrate_cadv"
+    description: "bitrate (Mbit/sec)"
     vnf_ids:
       - vnf: "cache:client"
         direction: "tx"
@@ -25,15 +25,15 @@ vnf_metrics:
     description: "non cached download latency (sec/Mbyte)"
     vnf_ids:
       - vnf: "client"
-  - metric_type: "processed_cached_reqs_per_sec"
-    description: "processed cached reqs/sec (reqs/sec)"
-    vnf_ids:
-      - vnf: "client"
-  - metric_type: "processed_non_cached_reqs_per_sec"
-    description: "processed non cached reqs/sec (reqs/sec)"
-    vnf_ids:
-      - vnf: "client"
-  - metric_type: "processed_false_reqs_per_sec"
-    description: "processed false reqs/sec (reqs/sec)"
-    vnf_ids:
-      - vnf: "client"
+#  - metric_type: "processed_cached_reqs_per_sec"
+#    description: "processed cached reqs/sec (reqs/sec)"
+#    vnf_ids:
+#      - vnf: "client"
+#  - metric_type: "processed_non_cached_reqs_per_sec"
+#    description: "processed non cached reqs/sec (reqs/sec)"
+#    vnf_ids:
+#      - vnf: "client"
+#  - metric_type: "processed_false_reqs_per_sec"
+#    description: "processed false reqs/sec (reqs/sec)"
+#    vnf_ids:
+#      - vnf: "client"
