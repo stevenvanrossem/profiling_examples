@@ -55,6 +55,8 @@ PROM_INPUT_CACHED_REQS = Counter('input_cached_reqs', 'cached requests',
                          ['vnf_name'], registry=VCDN_REGISTRY).labels(vnf_name=VNF_NAME)
 PROM_INPUT_NON_CACHED_REQS = Counter('input_non_cached_reqs', 'cached requests',
                                ['vnf_name'], registry=VCDN_REGISTRY).labels(vnf_name=VNF_NAME)
+PROM_FAILED_REQS = Counter('input_failed_reqs', 'failed requests',
+                               ['vnf_name'], registry=VCDN_REGISTRY).labels(vnf_name=VNF_NAME)
 
 PROM_CACHED_REQS_CURRENT = Gauge('cached_reqs_count', 'number of ongoing cached requests',
                              ['vnf_name'], registry=VCDN_REGISTRY).labels(vnf_name=VNF_NAME)
@@ -196,11 +198,14 @@ class FileGetter(TaskSet):
         total_time = (time.time() - start)
         logging.info("c status code: {} - {}".format(r.status_code, r.reason))
 
-        total_length = int(r.headers.get('content-length'))
-        PROM_FILESIZE.observe(total_length)
-        PROM_PROCESSED_CACHED_REQS.inc()
-        total_speed = total_length // total_time
-        PROM_CACHED_SPEED.observe(total_speed)
+        if r.status_code == 200:
+            total_length = int(r.headers.get('content-length'))
+            PROM_FILESIZE.observe(total_length)
+            PROM_PROCESSED_CACHED_REQS.inc()
+            total_speed = total_length // total_time
+            PROM_CACHED_SPEED.observe(total_speed)
+        else:
+            PROM_FAILED_REQS.inc()
 
 
     @PROM_NON_CACHED_REQS_CURRENT.track_inprogress()
@@ -228,11 +233,14 @@ class FileGetter(TaskSet):
         total_time = (time.time() - start)
         logging.info("nc status code: {} - {}".format(r.status_code, r.reason))
 
-        total_length = int(r.headers.get('content-length'))
-        PROM_FILESIZE.observe(total_length)
-        PROM_PROCESSED_NON_CACHED_REQS.inc()
-        total_speed = total_length // total_time
-        PROM_NON_CACHED_SPEED.observe(total_speed)
+        if r.status_code == 200:
+            total_length = int(r.headers.get('content-length'))
+            PROM_FILESIZE.observe(total_length)
+            PROM_PROCESSED_NON_CACHED_REQS.inc()
+            total_speed = total_length // total_time
+            PROM_NON_CACHED_SPEED.observe(total_speed)
+        else:
+            PROM_FAILED_REQS.inc()
 
 
 

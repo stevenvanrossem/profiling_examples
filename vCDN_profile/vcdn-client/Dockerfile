@@ -30,6 +30,8 @@ RUN chmod +x squid_client.py
 
 ADD locustfile.py locustfile.py
 RUN chmod +x locustfile.py
+ADD locustfile2.py locustfile2.py
+RUN chmod +x locustfile2.py
 
 ADD client_config.yml client_config.yml
 RUN chmod +x client_config.yml

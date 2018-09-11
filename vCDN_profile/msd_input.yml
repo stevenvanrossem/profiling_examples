@@ -34,6 +34,10 @@ vnf_metrics:
     description: "generated users"
     vnf_ids:
       - vnf: "client"
+  - metric_type: "failed_reqs_per_sec"
+    description: "failed requests"
+    vnf_ids:
+      - vnf: "client"
 #  - metric_type: "cached_users"
 #    description: "input cached users"
 #    vnf_ids:
