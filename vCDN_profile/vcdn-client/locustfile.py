@@ -13,7 +13,8 @@ from math import isnan
 import requests
 import time
 import signal
-from random import randint, random, choice
+from random import randint, random, choice, shuffle
+from fractions import Fraction
 
 from locust import HttpLocust, TaskSet, events, task
 
@@ -22,7 +23,8 @@ import yaml
 import logging
 logging.basicConfig(format='%(name)s:%(levelname)s %(module)s:%(lineno)d:  %(message)s', level="DEBUG")
 
-VNF_NAME = os.environ.get('VNF_NAME', 'test')
+#VNF_NAME = os.environ.get('VNF_NAME', 'test')
+VNF_NAME = 'client'
 #pushgateway = 'localhost:9091'
 PUSHGATEWAY = '172.17.0.1:9091'
 
@@ -107,15 +109,32 @@ def genFileId(numFiles=10):
 def genBool():
     return random() < 0.5
 
+
 # return True if request should be cached
-def genCached(percentage_cached):
+def genCached(percentage_cached, num_reqs):
     # pickList = ['cached'] * percentage_cached + ['noncached'] * (100 - percentage_cached)
     # req = choice(pickList)
     # if req == 'cached':
     #     return True
     # else:
     #     return False
-    return randint(0, 99) < percentage_cached 
+    #num_reqs += 1
+    #ratio = Fraction(percentage_cached, 100)
+    #len = ratio.denominator
+    #n_cached = ratio.numerator
+    #picklist = [True] * n_cached + [False] * (len - n_cached)
+    #ret = picklist[num_reqs]
+    period = int(100/percentage_cached)
+    num = num_reqs % period
+
+    if num == 0:
+        ret = True
+        num_reqs = 0
+    else:
+        ret = False
+
+    return ret, num_reqs
+    #return randint(0, 99) < percentage_cached
 
 
 class RandomGetter(TaskSet):
@@ -160,13 +179,24 @@ class FileGetter(TaskSet):
     def on_start(self):
         PROM_VCDN_USERS.inc()
         self.percentage_cached = CONFIG['percentage_cached']
-        self.monitored_cached = 0
-        self.monitored_noncached = 0
+        ratio = Fraction(self.percentage_cached, 100)
+        len = ratio.denominator
+        n_cached = ratio.numerator
+        self.requestlist = [True] * n_cached + [False] * (len - n_cached)
+        shuffle(self.requestlist)
+        #self.monitored_cached = 0
+        #self.monitored_noncached = 0
+        self.reqs = 0
 
     # get a file from the cdn
     @task(1)
     def browse(self):
-        self.cached = genCached(self.percentage_cached)
+        self.cached = self.requestlist[self.reqs]
+        self.reqs += 1
+        if self.reqs == len(self.requestlist):
+            self.reqs = 0
+        #self.cached, self.reqs = genCached(self.percentage_cached, self.reqs)
+        logging.info("reqs: {}".format(self.reqs))
         if self.cached:
             self.doCachedRequest()
         else:

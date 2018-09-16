@@ -3,15 +3,15 @@ import logging
 import glob
 import numpy as np
 from execute_profiling import CONFIGS
-import matplotlib.pyplot as plt
-from sklearn.cross_decomposition import CCA
-from sklearn.cross_decomposition import PLSRegression
-from sklearn.decomposition import FactorAnalysis as FA
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn import linear_model
-from operator import add, div
+#import matplotlib.pyplot as plt
+#from sklearn.cross_decomposition import CCA
+#from sklearn.cross_decomposition import PLSRegression
+#from sklearn.decomposition import FactorAnalysis as FA
+#from sklearn.preprocessing import PolynomialFeatures
+#from sklearn import linear_model
+#from operator import add, div
 from copy import deepcopy
-import csv
+#import csv
 import pandas as pd
 
 logging.basicConfig(level='DEBUG')
@@ -76,6 +76,7 @@ def getMetricsFromFiles(filepath):
         #'processed_cached_reqs_per_sec@client': [],
         #'processed_non_cached_reqs_per_sec@client': [],
         #'processed_false_reqs_per_sec@client': [],
+        'failed_reqs_per_sec@client': [],
     }
 
     ignored_metrics = [
@@ -117,13 +118,14 @@ def getMetricsFromFiles(filepath):
                 name = metric.metric_name
                 if name in ignored_metrics:
                     continue
-                value = metric.median
+                #value = metric.median
+                value = metric.average
                 metrics[name].append(value)
 
         logging.info("got metrics from: " + resultFile)
 
     lenList = []
-    for key, value in metrics.iteritems():
+    for key, value in metrics.items():
         lenList.append(len(value))
 
     if checkEqual(lenList):
@@ -159,6 +161,12 @@ resultsfiles6 = "0p_results/results_*"
 
 resultsfiles7 = "1024MB_1core/results_*"
 resultsfiles8 = "1024MB_1core_extended/results_*"
+resultsfiles9 = "walltest1/results_*"
+resultsfiles9 = "test_wall/results_*"
+resultsfiles9 = "walltest2/results_*"
+resultsfiles9 = "walltest3/results_*"
+resultsfiles9 = "walltest4/results_*"
+resultsfiles9 = "walltest6/results_*"
 
 # process metrics once
 #metrics = getMetricsFromFiles(resultsfiles)
@@ -166,4 +174,4 @@ resultsfiles8 = "1024MB_1core_extended/results_*"
 #metrics3 = getMetricsFromFiles(resultsfiles3)
 #metrics6 = getMetricsFromFiles(resultsfiles6)
 
-getMetricsFromFiles(resultsfiles8)
+getMetricsFromFiles(resultsfiles9)

@@ -20,6 +20,12 @@ vnf_metrics:
     description: "memory usage (MB)"
     vnf_ids:
       - vnf: "cache" 
+  - metric_type: "disk"
+    description: "disk io wait rate (sec)"
+    vnf_ids:
+      - vnf: "cache" 
+      - vnf: "server" 
+      - vnf: "client" 
 #      - vnf: "squid" 
 #      - vnf: "ns_port1" 
 #  - metric_type: "cached_reqs_count"

@@ -21,7 +21,7 @@ service_experiments:
   - name: "cache"
     description: "start a number of cached and non-cached downloads in parallel"
     repetitions: 1
-    time_limit: "20"
+    time_limit: "60"
     # NSD to be used (SONATA-like vendor.name.version reference)
     # service: "eu.sonata-nfv.sonata-fw-vtc-service.0.1"
     # additional containers for traffic generation/measurements (like SAPs)
@@ -29,14 +29,19 @@ service_experiments:
       - name: "client"
         #connection_point: "ns:port0"
         container: "vcdn_client"
-        #configuration:
-        #  - bash -c "echo 'export http_proxy=10.30.3.1:3128' >> ~/.bashrc"
+        configuration:
+          #- bash -c "echo 'export http_proxy=10.30.3.1:3128' >> ~/.bashrc"
+          - python fill_cache.py
         #cmd: python squid_client.py 10 10 'http://10.20.0.2:8888/file/${10,50}' '10.10.0.1:3128'
         #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${10,30,70,100,130,170,200} -r 100 UserNonCached UserCached
         #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${2} -r 10 UserFalse
         #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${2} -r 2 UserNonCached UserCached
-        #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${200} -r 100 CDNUser
-        cmd: bash start_client.sh ${90}
+        #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${40,80} -r 100 CDNUser
+        cmd: bash start_client.sh ${3,5,6,7,10,20,30,40,50,60,70,80,90}
+        #cmd: bash start_client.sh ${3}
+        #first measurement is double to allow filling up the cache
+        # also include very low number of users, to build model non-sat
+        #cmd: bash start_client.sh ${3,5,10,20,30,40,50,60,70,90,100}
         cmd_order: 3
       - name: "server"
         #connection_point: "ns:port1"
@@ -69,12 +74,11 @@ service_experiments:
       - function: "cache"
         #cpu_bw: "${0.1 to 0.7 step 0.5}"
         #cpu_bw: 0.5
-        cpuset_cpus: 3
-        mem_limit: 1024m
+        cpuset_cpus: 23
+        #mem_limit: 1024m
       - function: "server"
-        cpuset_cpus: 0,1,2
+        cpuset_cpus: 0-21
         #cpu_bw: "0.4"
       - function: "client"
-        cpuset_cpus: 0,1,2
+        cpuset_cpus: 0-21
         #cpu_bw: "0.4"
-

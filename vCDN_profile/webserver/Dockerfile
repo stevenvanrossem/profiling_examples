@@ -5,7 +5,9 @@ RUN	apt-get update && apt-get install -y \
 	net-tools \
 	iproute \
 	inetutils-ping \
-        ethtool
+        ethtool \
+        procps \
+        nano  
 
 
 ADD start.sh start.sh

@@ -7,7 +7,9 @@ RUN	apt-get update && apt-get install -y \
 	inetutils-ping \
         ethtool \
 	curl \
-        nano
+        nano \
+        psmisc \
+        procps
 
 
 ADD start.sh start.sh
@@ -32,6 +34,10 @@ ADD locustfile.py locustfile.py
 RUN chmod +x locustfile.py
 ADD locustfile2.py locustfile2.py
 RUN chmod +x locustfile2.py
+ADD locustfile3.py locustfile3.py
+RUN chmod +x locustfile3.py
+ADD fill_cache.py fill_cache.py
+RUN chmod +x fill_cache.py
 
 ADD client_config.yml client_config.yml
 RUN chmod +x client_config.yml
