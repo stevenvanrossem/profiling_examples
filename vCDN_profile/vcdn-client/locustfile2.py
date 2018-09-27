@@ -68,12 +68,16 @@ PROM_CACHED_SPEED = Summary('cached_download_speed', 'cached download speed',
                        ['vnf_name'], registry=VCDN_REGISTRY).labels(vnf_name=VNF_NAME)
 PROM_NON_CACHED_SPEED = Summary('non_cached_download_speed', 'non-cached download speed',
                             ['vnf_name'], registry=VCDN_REGISTRY).labels(vnf_name=VNF_NAME)
+PROM_CACHED_TIME = Summary('cached_download_time', 'cached download time',
+                       ['vnf_name'], registry=VCDN_REGISTRY).labels(vnf_name=VNF_NAME)
+PROM_NON_CACHED_TIME = Summary('non_cached_download_time', 'non-cached download time',
+                            ['vnf_name'], registry=VCDN_REGISTRY).labels(vnf_name=VNF_NAME)
 
 #start_http_server(8000)
 
 HTTP_PROXY = "10.10.0.1:3128"
 os.environ["http_proxy"] = HTTP_PROXY
-
+os.environ["no_proxy"] = "172.17.0.1"
 
 def readConfig(path):
     yml = None
@@ -225,7 +229,7 @@ class FileGetter(TaskSet):
         start = time.time()
         r = self.client.get(url, headers=headers)
         total_time = (time.time() - start)
-        logging.info("c status code: {} - {}".format(r.status_code, r.reason))
+        logging.info("{} cached status code: {} - {}".format(url, r.status_code, r.reason))
 
         if r.status_code == 200:
             total_length = int(r.headers.get('content-length'))
@@ -233,6 +237,7 @@ class FileGetter(TaskSet):
             PROM_PROCESSED_CACHED_REQS.inc()
             total_speed = total_length // total_time
             PROM_CACHED_SPEED.observe(total_speed)
+            PROM_CACHED_TIME.observe(total_time)
         else:
             PROM_FAILED_REQS.inc()
 
@@ -260,7 +265,7 @@ class FileGetter(TaskSet):
         start = time.time()
         r = self.client.get(url, headers=headers)
         total_time = (time.time() - start)
-        logging.info("nc status code: {} - {}".format(r.status_code, r.reason))
+        logging.info("{} non-cached status code: {} - {}".format(url, r.status_code, r.reason))
 
         if r.status_code == 200:
             total_length = int(r.headers.get('content-length'))
@@ -268,6 +273,7 @@ class FileGetter(TaskSet):
             PROM_PROCESSED_NON_CACHED_REQS.inc()
             total_speed = total_length // total_time
             PROM_NON_CACHED_SPEED.observe(total_speed)
+            PROM_NON_CACHED_TIME.observe(total_time)
         else:
             PROM_FAILED_REQS.inc()
 

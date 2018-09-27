@@ -14,5 +14,7 @@ export http_proxy="10.10.0.1:3128"
 # start master
 #locust --master --expect-slaves=2 --host http://10.20.0.2:8888 --no-web -c $1 -r 100
 locust -f locustfile.py --host http://10.20.0.2:8888 --no-web -c $1 -r 100 CDNUser&
-locust -f locustfile2.py --host http://10.20.0.2:8888 --no-web -c $1 -r 100 CDNUser
-#locust -f locustfile3.py --host http://10.20.0.2:8888 --no-web -c $1 -r 100 CDNUser
+locust -f locustfile2.py --host http://10.20.0.2:8888 --no-web -c $1 -r 100 CDNUser&
+locust -f locustfile3.py --host http://10.20.0.2:8888 --no-web -c $1 -r 100 CDNUser&
+locust -f locustfile4.py --host http://10.20.0.2:8888 --no-web -c $1 -r 100 CDNUser&
+locust -f locustfile5.py --host http://10.20.0.2:8888 --no-web -c $1 -r 100 CDNUser

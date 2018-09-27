@@ -64,6 +64,17 @@ def getMetricsFromFiles(filepath):
         'cpu_limit': [],
         'cpu@cache': [],
         'mem@cache': [],
+        'disk_node@cache': [],
+        'disk_write_speed@cache': [],
+        'iowait_node_23@cache': [],
+        'iowait_node_23_perc@cache': [],
+        'idle_node_23@cache': [],
+        'irq_node_23@cache': [],
+        'softirq_node_23@cache': [],
+        #'system_node_23@cache': [],
+        #'user_node_23_perc@cache': [],
+        'tcp_established_cadv@cache': [],
+        'tasks_uninterruptible_cadv@cache': [],
         'filesize@client': [],
         'vcdn_users@client': [],
         #'cached_users@client': [],
@@ -71,8 +82,11 @@ def getMetricsFromFiles(filepath):
         #'false_users@client': [],
         'tx_bitrate_cadv@cache:client': [],
         'rx_bitrate_cadv@cache:server': [],
+        'tx_packet_size_cadv@cache:client': [],
         'cached_download_latency@client': [],
         'non_cached_download_latency@client': [],
+        'cached_download_time@client': [],
+        'non_cached_download_time@client': [],
         #'processed_cached_reqs_per_sec@client': [],
         #'processed_non_cached_reqs_per_sec@client': [],
         #'processed_false_reqs_per_sec@client': [],
@@ -81,7 +95,9 @@ def getMetricsFromFiles(filepath):
 
     ignored_metrics = [
         'cpu@server',
-        'cpu@client'
+        'cpu@client',
+        'disk@client',
+        'disk@server',
     ]
 
     resultList = glob.glob(filepath)
@@ -115,11 +131,19 @@ def getMetricsFromFiles(filepath):
 
             #metrics['wl_objects'].append(wl_objects)
             for metric in run['metrics']:
+                #delta = abs(metric.CI.get('max',0) - metric.CI.get('min',0))
+                #if metric.average * 2 < delta:
+                #    value = metric.CI.get('max',0)
+                #else:
+                #    value = metric.average
                 name = metric.metric_name
                 if name in ignored_metrics:
                     continue
                 #value = metric.median
                 value = metric.average
+                #print(name)
+                #print(delta)
+                #print(value)
                 metrics[name].append(value)
 
         logging.info("got metrics from: " + resultFile)
@@ -167,6 +191,8 @@ resultsfiles9 = "walltest2/results_*"
 resultsfiles9 = "walltest3/results_*"
 resultsfiles9 = "walltest4/results_*"
 resultsfiles9 = "walltest6/results_*"
+resultsfiles9 = "walltest_nodiskio/results_*"
+resultsfiles9 = "walltest_nodiskio_4/results_*"
 
 # process metrics once
 #metrics = getMetricsFromFiles(resultsfiles)

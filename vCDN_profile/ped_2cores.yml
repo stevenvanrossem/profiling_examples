@@ -1,0 +1,85 @@
+---
+#
+# This is an example for a profiling experiment descriptor (PED).
+# It defines profiling experiments for the sonata-fw-vtc-service-emu example service.
+#
+descriptor_version: 0.10
+# SONATA-like identifier (just in case we need it)
+vendor: "eu.sonata-nfv"
+name: "squid-test"
+version: "0.1"
+author: "steven.vanrossem@ugent.be"
+description: "This is an example profiling experiment descriptor (PED)."
+
+# path to the package of the service we want to profile
+service_package: "./squid.son"
+
+#
+# First type of experiments: Service level experiments
+#
+service_experiments:
+  - name: "cache"
+    description: "start a number of cached and non-cached downloads in parallel"
+    repetitions: 1
+    time_limit: "50"
+    # NSD to be used (SONATA-like vendor.name.version reference)
+    # service: "eu.sonata-nfv.sonata-fw-vtc-service.0.1"
+    # additional containers for traffic generation/measurements (like SAPs)
+    measurement_points:
+      - name: "client"
+        #connection_point: "ns:port0"
+        container: "vcdn_client"
+        configuration:
+          #- bash -c "echo 'export http_proxy=10.30.3.1:3128' >> ~/.bashrc"
+          - python fill_cache.py
+        #cmd: python squid_client.py 10 10 'http://10.20.0.2:8888/file/${10,50}' '10.10.0.1:3128'
+        #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${10,30,70,100,130,170,200} -r 100 UserNonCached UserCached
+        #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${2} -r 10 UserFalse
+        #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${2} -r 2 UserNonCached UserCached
+        #cmd: locust --host http://10.20.0.2:8888 --no-web -c ${40,80} -r 100 CDNUser
+        #cmd: bash start_client.sh ${1,2,3,5,7,10,12,15,20,25,30,35,40,45}
+        cmd: bash start_client.sh ${2,5,7,10,15,20,30,40,50,60,70,80,90,100,110}
+        #cmd: bash start_client.sh ${30,35,40}
+        #first measurement is double to allow filling up the cache
+        # also include very low number of users, to build model non-sat
+        #cmd: bash start_client.sh ${3,5,10,20,30,40,50,60,70,90,100}
+        cmd_order: 3
+      - name: "server"
+        #connection_point: "ns:port1"
+        container: "webserver"
+        #configuration:
+        #  - 'python web_server.py'
+        cmd_order: 2
+      - name: "cache"
+        #connection_point: "cache:client"
+        container: "squid-vnf"
+        #configuration:
+        #  - 'sysctl -w net.ipv4.conf.all.proxy_arp=1'
+        cmd_order: 1
+    input_metrics: "msd_input.yml"
+    output_metrics: "msd_output.yml"
+    profile_calculations:
+      #- name: "cpu_profile"
+      #  input_metric: "cached_reqs_per_sec@client"
+      #  output_metric: "cpu@cache"
+      - name: "non_cached_latency_profile"
+        input_metric: "non_cached_users@client"
+        output_metric: "non_cached_download_latency@client"
+      - name: "cached_processed_requests_rate"
+        input_metric: "cached_users@client"
+        output_metric: "processed_cached_reqs_per_sec@client"
+      #- name: "filesize_profile"
+      #  input_metric: "filesize@client"
+      #  output_metric: "cached_download_speed@client"
+    resource_limitations:
+      - function: "cache"
+        #cpu_bw: "${0.1 to 0.7 step 0.5}"
+        #cpu_bw: 0.5
+        cpuset_cpus: 22-23
+        #mem_limit: 1024m
+      - function: "server"
+        cpuset_cpus: 0-3
+        #cpu_bw: "0.4"
+      - function: "client"
+        cpuset_cpus: 4-13
+        #cpu_bw: "0.4"

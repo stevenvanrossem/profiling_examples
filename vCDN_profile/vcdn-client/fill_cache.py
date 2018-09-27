@@ -21,7 +21,7 @@ def readConfig(path):
 
 def genFileSizes(min=1, max=10, scaler=1):
     filesizes = list(range(min,max+1))
-    new_filesizes = [ int(x / scaler) for x in filesizes]
+    new_filesizes = [ (x / scaler) for x in filesizes]
     return new_filesizes
 
 def genFileIds(numFiles=10):

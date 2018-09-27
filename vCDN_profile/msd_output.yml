@@ -17,12 +17,25 @@ vnf_metrics:
         direction: "tx"
       - vnf: "cache:server"
         direction: "rx"
+  - metric_type: "packet_size_cadv"
+    description: "packet size (bytes/packet)"
+    vnf_ids:
+      - vnf: "cache:client"
+        direction: "tx"
   - metric_type: "cached_download_latency"
     description: "cached download latency (sec/Mbyte)"
     vnf_ids:
       - vnf: "client"
   - metric_type: "non_cached_download_latency"
     description: "non cached download latency (sec/Mbyte)"
+    vnf_ids:
+      - vnf: "client"
+  - metric_type: "cached_download_time"
+    description: "cached download time (sec)"
+    vnf_ids:
+      - vnf: "client"
+  - metric_type: "non_cached_download_time"
+    description: "non cached download time (sec)"
     vnf_ids:
       - vnf: "client"
 #  - metric_type: "processed_cached_reqs_per_sec"

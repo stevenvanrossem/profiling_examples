@@ -121,10 +121,12 @@ CONFIGS = {'medium': MEDIUM_CONF}
 if __name__ == "__main__":
     #cached_perc = [10, 20, 30, 40, 50, 60, 70, 80, 90]
     #cached_perc = [10, 30, 70, 90]
-    cached_perc = [10, 20, 30, 40, 50, 60, 70, 80, 90]
-    filesizes = [0.1, 0.5, 1, 5, 7, 10, 20, 30, 40, 50]
-    #cached_perc = [10,90]
-    #filesizes = [40]
+    cached_perc = [90, 70, 50, 30, 10]
+    #filesizes = [1, 5, 10, 50, 100, 500, 1000, 3000]  #kB
+    filesizes = [3000, 2000, 1000, 700, 500, 400, 300, 200, 100, 50, 10, 5, 1]  #kB
+    #filesizes = [3000, 2000, 700]  #kB
+    #cached_perc = [90]
+    #filesizes = [10]
     client_ratelimit = [1000]
     # calculate Cartesian product of all workload parameters
     configs = []
@@ -143,10 +145,10 @@ if __name__ == "__main__":
 
         ratelimit = conf[2]
         filesize = conf[1]
-        filesize2 = [filesize, filesize, 10]
-        delay = [1000, 1000]
+        filesize2 = [filesize, filesize, 1000]
+        delay = [300, 500]
         objects = [50, 50]
-        id = 'walltest6'
+        id = 'walltest_nodiskio_1'
 
         cached_perc = conf[0]
         #c = float(cached_perc/10)

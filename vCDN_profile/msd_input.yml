@@ -20,14 +20,42 @@ vnf_metrics:
     description: "memory usage (MB)"
     vnf_ids:
       - vnf: "cache" 
-  - metric_type: "disk"
-    description: "disk io wait rate (sec)"
+  - metric_type: "disk_node"
+    description: "disk io time (perc)"
     vnf_ids:
       - vnf: "cache" 
-      - vnf: "server" 
-      - vnf: "client" 
-#      - vnf: "squid" 
-#      - vnf: "ns_port1" 
+  - metric_type: "disk_write_speed"
+    description: "disk write speed (MB/s)"
+    vnf_ids:
+      - vnf: "cache" 
+  - metric_type: "iowait_node_23"
+    description: "cpu io wait (perc)"
+    vnf_ids:
+      - vnf: "cache" 
+  - metric_type: "irq_node_23"
+    description: "cpu irq (perc)"
+    vnf_ids:
+      - vnf: "cache" 
+  - metric_type: "softirq_node_23"
+    description: "cpu softirq (perc)"
+    vnf_ids:
+      - vnf: "cache" 
+  - metric_type: "idle_node_23"
+    description: "cpu idle (perc)"
+    vnf_ids:
+      - vnf: "cache" 
+  - metric_type: "iowait_node_23_perc"
+    description: "cpu io wait perc (perc)"
+    vnf_ids:
+      - vnf: "cache" 
+  - metric_type: "tcp_established_cadv"
+    description: "tcp ongoing connections (connections)"
+    vnf_ids:
+      - vnf: "cache" 
+  - metric_type: "tasks_uninterruptible_cadv"
+    description: "io blocked tasks (tasks)"
+    vnf_ids:
+      - vnf: "cache" 
 #  - metric_type: "cached_reqs_count"
 #    description: "started cached requests (requests)"
 #    vnf_ids:
