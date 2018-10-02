@@ -192,7 +192,7 @@ resultsfiles9 = "walltest3/results_*"
 resultsfiles9 = "walltest4/results_*"
 resultsfiles9 = "walltest6/results_*"
 resultsfiles9 = "walltest_nodiskio/results_*"
-resultsfiles9 = "walltest_nodiskio_4/results_*"
+resultsfiles9 = "walltest_nodiskio_2/results_*"
 
 # process metrics once
 #metrics = getMetricsFromFiles(resultsfiles)

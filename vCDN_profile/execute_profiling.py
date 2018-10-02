@@ -127,7 +127,7 @@ if __name__ == "__main__":
     #filesizes = [3000, 2000, 700]  #kB
     #cached_perc = [90]
     #filesizes = [10]
-    client_ratelimit = [1000]
+    client_ratelimit = [2000]
     # calculate Cartesian product of all workload parameters
     configs = []
     for config in itertools.product(cached_perc, filesizes, client_ratelimit):
@@ -148,7 +148,7 @@ if __name__ == "__main__":
         filesize2 = [filesize, filesize, 1000]
         delay = [300, 500]
         objects = [50, 50]
-        id = 'walltest_nodiskio_1'
+        id = 'walltest_nodiskio_2'
 
         cached_perc = conf[0]
         #c = float(cached_perc/10)
